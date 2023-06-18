@@ -3,8 +3,7 @@ import './style.css'
 import Night from '../Images/nighttt.jpg'
 import Day from '../Images/day.png'
 import WeatherImages from '../weatherConditions/WeatherImages'
-
-
+import Axios from 'axios'
 
 const WeatherApp = () => {
     let [loc, setLoction] = useState();
@@ -15,40 +14,35 @@ const WeatherApp = () => {
     let [timer, setTimer] = useState();
     let [cloud, setCloud] = useState();
     let [windspeed, setWindspeed] = useState();
-    useEffect(
-        () => {
-            fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d885aa1d783fd13a55050afeef620fcb`)
-                .then(res => res.json())
-                .then(res => {
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                let response = await Axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d885aa1d783fd13a55050afeef620fcb`);
+                console.log(response)
+                let res = await response.data;
 
-                    if (res.main !== undefined) {
-                        const kelvin = res.main.temp;
-                        const celsius = kelvin - 273.15;
-
-                        if (city === res.name.toUpperCase()) {
-                            setTemperature(Math.trunc(celsius));
-                            setHumidity(res.main.humidity);
-                            setonsearch(true);
-                            setCloud(res.weather[0].main);
-                            setWindspeed(Math.trunc(Number(res.wind.speed) * 3.6));
-                        }
-                    }
-                    else {
-                        setonsearch(false);
-                    }
-
-                })
-                .catch((error) => {
-                    alert("Entered Location dosen't Match")
-                })
-
+                if (res !== undefined) {
+                    const kelvin = res.main.temp;
+                    const celsius = kelvin - 273.15;
+                    setTemperature(Math.trunc(celsius));
+                    setHumidity(res.main.humidity);
+                    setonsearch(true);
+                    setCloud(res.weather[0].main);
+                    setWindspeed(Math.trunc(Number(res.wind.speed) * 3.6));
+                }
+            }
+            catch (error) {
+                console.log(error);
+                setonsearch(false)
+            }
             setInterval(() => {
                 let time = new Date();
                 setTimer(time.getHours());
             }, 1000)
-
-
-        },
+        }
+        fetchData();
+    }
+        ,
         [city]
     )
 
